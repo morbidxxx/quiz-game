@@ -44,9 +44,12 @@
 
         <div class="text-center mb-8">
             <div class="mb-6 p-4 bg-white/10 rounded-lg">
-                <h3 class="text-lg font-semibold mb-2">📁 Ваши файлы готовы!</h3>
-                <p class="text-sm mb-2">Найдено изображений фильмов: <span class="font-bold text-green-300">6</span></p>
-                <div class="text-xs text-green-200">✅ Используются ваши изображения</div>
+                <h3 class="text-lg font-semibold mb-2">📁 Статус файлов</h3>
+                <p class="text-sm mb-2">Изображения фильмов: <span class="font-bold text-green-300">6 шт ✅</span></p>
+                <p class="text-sm mb-2">Аудио файлы: <span class="font-bold text-blue-300">Загрузите в папку audio/</span></p>
+                <div class="text-xs text-yellow-200">
+                    💡 Поместите файлы: bohemian_rhapsody_reverse.mp3, billie_jean_reverse.mp3
+                </div>
             </div>
             
             <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
@@ -149,21 +152,29 @@
                         <div class="text-5xl mb-4">🎵</div>
                         <p class="text-xl">Песня: <strong id="songName">Bohemian Rhapsody</strong></p>
                         <p class="text-sm opacity-75 mt-2">(Демо режим - аудио файлы не загружены)</p>
-                        <div class="mt-4">
+                        <div class="mt-4" id="audioContainer">
                             <div class="bg-gray-800 p-4 rounded-lg">
-                                <p class="text-sm mb-3">🎵 Вставьте ссылку на аудио:</p>
-                                <input 
-                                    type="url" 
-                                    id="audioUrl" 
-                                    class="w-full p-2 rounded text-black mb-3"
-                                    placeholder="https://example.com/song.mp3"
-                                >
-                                <button onclick="loadAudio()" class="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600">
-                                    Загрузить аудио
-                                </button>
-                                <audio id="audioPlayer" controls class="w-full mt-3 hidden">
-                                    Ваш браузер не поддерживает аудио
-                                </audio>
+                                <div id="audioLoadedState" class="hidden">
+                                    <p class="text-sm mb-3 text-green-300">✅ Аудио файл найден</p>
+                                    <audio id="audioPlayer" controls class="w-full mb-3">
+                                        Ваш браузер не поддерживает аудио
+                                    </audio>
+                                    <div class="flex gap-2">
+                                        <button onclick="playAudio()" id="playBtn" class="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600 text-sm">
+                                            ▶️ Играть
+                                        </button>
+                                        <button onclick="playReversed()" class="bg-purple-500 px-4 py-2 rounded hover:bg-purple-600 text-sm">
+                                            🔄 Наоборот (демо)
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="audioNotFoundState">
+                                    <p class="text-sm mb-3 text-yellow-300">⚠️ Аудио файл не найден</p>
+                                    <p class="text-xs mb-3">Загрузите файл: <span id="expectedAudioFile" class="font-mono bg-black/50 px-2 py-1 rounded">audio/song.mp3</span></p>
+                                    <button class="bg-gray-600 px-4 py-2 rounded cursor-not-allowed text-sm">
+                                        🎵 Файл отсутствует
+                                    </button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -224,7 +235,7 @@
                 <!-- Результат -->
                 <div id="resultSection" class="text-center hidden">
                     <div id="resultMessage" class="text-4xl font-bold mb-4"></div>
-                    <p class="text-2xl mb-4">Правильный ответ: <strong id="correctAnswer">пятый элемент</strong></p>
+                    <p class="text-2xl mb-4">Правильный ответ: <strong id="correctAnswer">5 элемент</strong></p>
                     <p id="pointsMessage" class="text-xl mb-4"></p>
                     <p class="text-sm opacity-75">Переход к следующему вопросу...</p>
                 </div>
@@ -238,7 +249,7 @@
             {
                 type: 'puzzle',
                 title: 'Угадай фильм по кадру',
-                image: 'photos/film_5_element.jpg',
+                image: 'photos/film_5_element.png',
                 correctAnswer: 'пятый элемент',
                 points: 100,
                 options: ['5 элемент', 'Матрица', 'Аватар', 'Интерстеллар']
@@ -283,10 +294,12 @@
                 points: 200,
                 options: ['mask', 'Бэтмен', 'Человек-паук', 'Железный человек']
             },
+
             {
                 type: 'reverse-song',
                 title: 'Угадай песню (играет наоборот)',
                 description: 'Песня Queen про оперу и рок, название рифмуется со словом "псевдо"',
+                audioFile: 'audio/bohemian_rhapsody_reverse.mp3',
                 correctAnswer: 'Bohemian Rhapsody',
                 points: 150,
                 options: ['Bohemian Rhapsody', 'We Will Rock You', 'Another One Bites the Dust', 'Don\'t Stop Me Now']
@@ -482,6 +495,7 @@
                 type: 'reverse-song',
                 title: 'Угадай песню (играет наоборот)',
                 description: 'Майкл Джексон поет НЕ о том, что он отец мальчика',
+                audioFile: 'audio/billie_jean_reverse.mp3',
                 correctAnswer: 'Billie Jean',
                 points: 180,
                 options: ['Billie Jean', 'Beat It', 'Thriller', 'Smooth Criminal']
@@ -539,6 +553,97 @@
                 correctAnswer: 'Подмосковные вечера',
                 points: 100,
                 options: ['Подмосковные вечера', 'Московские окна', 'Вечерняя песня', 'Огни Москвы']
+            },
+            // Современные российские хиты 2020-2024
+            {
+                type: 'emoji-song',
+                title: 'Угадай русскую песню по эмодзи',
+                emojis: '👑🎭💎',
+                description: 'Хит Моргенштерна о роскоши и статусе',
+                correctAnswer: 'Aristocrat',
+                points: 120,
+                options: ['Aristocrat', 'Cadillac', 'Legendario', 'Yung Hefner']
+            },
+            {
+                type: 'emoji-song',
+                title: 'Угадай русскую песню по эмодзи',
+                emojis: '🌊💙🏝️',
+                description: 'Летний хит Элджея про море и отдых',
+                correctAnswer: 'Море',
+                points: 110,
+                options: ['Море', 'Лето', 'Пляж', 'Волна']
+            },
+            {
+                type: 'emoji-song',
+                title: 'Угадай русскую песню по эмодзи',
+                emojis: '🔥💃🎉',
+                description: 'Зажигательный трек Руки Вверх и NILETTO',
+                correctAnswer: 'Малиновый закат',
+                points: 130,
+                options: ['Малиновый закат', 'Красный рассвет', 'Розовый вечер', 'Алый закат']
+            },
+            {
+                type: 'emoji-song',
+                title: 'Угадай русскую песню по эмодзи',
+                emojis: '❄️🌨️💔',
+                description: 'Грустный хит Zivert о холодных чувствах',
+                correctAnswer: 'Credo',
+                points: 140,
+                options: ['Credo', 'Life', 'Beverly Hills', 'ЯТЛ']
+            },
+            {
+                type: 'emoji-song',
+                title: 'Угадай русскую песню по эмодзи',
+                emojis: '🌙✨💫',
+                description: 'Романтический хит Jony про ночное небо',
+                correctAnswer: 'Звёзды',
+                points: 115,
+                options: ['Звёзды', 'Луна', 'Космос', 'Небо']
+            },
+            {
+                type: 'emoji-song',
+                title: 'Угадай русскую песню по эмодзи',
+                emojis: '🚗💨🏁',
+                description: 'Динамичный трек Scriptonite про скорость',
+                correctAnswer: 'Космос',
+                points: 125,
+                options: ['Космос', 'Ракета', 'Скорость', 'Полёт']
+            },
+            {
+                type: 'emoji-song',
+                title: 'Угадай русскую песню по эмодзи',
+                emojis: '💊🌈🎪',
+                description: 'Яркий хит Клавы Коки про эмоции',
+                correctAnswer: 'Пьяная',
+                points: 105,
+                options: ['Пьяная', 'Цветная', 'Весёлая', 'Лёгкая']
+            },
+            {
+                type: 'emoji-song',
+                title: 'Угадай русскую песню по эмодзи',
+                emojis: '🏠💕👨‍👩‍👧‍👦',
+                description: 'Семейный хит Артёма Пивоварова',
+                correctAnswer: 'Дом',
+                points: 95,
+                options: ['Дом', 'Семья', 'Родные', 'Близкие']
+            },
+            {
+                type: 'emoji-song',
+                title: 'Угадай русскую песню по эмодзи',
+                emojis: '🎵🎤🔊',
+                description: 'Популярный трек HAMMALI & NAVAI',
+                correctAnswer: 'Девочка-война',
+                points: 135,
+                options: ['Девочка-война', 'Прятки', 'Пустота', 'Птичка']
+            },
+            {
+                type: 'emoji-song',
+                title: 'Угадай русскую песню по эмодзи',
+                emojis: '💰🏆⭐',
+                description: 'Мотивационный хит Тимати про успех',
+                correctAnswer: 'Мокрые кроссы',
+                points: 120,
+                options: ['Мокрые кроссы', 'Деньги решают', 'На вершине', 'Успех']
             }
         ];
 
@@ -614,6 +719,7 @@
             // Обновляем музыкальную секцию
             if (question.type === 'reverse-song') {
                 document.getElementById('songName').textContent = question.correctAnswer;
+                checkAudioFile(question.audioFile);
             }
 
             // Обновляем секцию эмодзи
@@ -768,15 +874,65 @@
             document.getElementById('gameTeam2Score').textContent = team2Score;
         }
 
-        // Загрузка аудио
-        window.loadAudio = function() {
-            const url = document.getElementById('audioUrl').value;
+        // Проверка существования аудио файла
+        function checkAudioFile(audioFile) {
+            if (!audioFile) return;
+            
+            const player = document.getElementById('audioPlayer');
+            const loadedState = document.getElementById('audioLoadedState');
+            const notFoundState = document.getElementById('audioNotFoundState');
+            const expectedFile = document.getElementById('expectedAudioFile');
+            
+            expectedFile.textContent = audioFile;
+            
+            // Пробуем загрузить аудио файл
+            const audio = new Audio();
+            audio.src = audioFile;
+            
+            audio.addEventListener('canplaythrough', () => {
+                // Файл найден и может быть воспроизведен
+                player.src = audioFile;
+                loadedState.classList.remove('hidden');
+                notFoundState.classList.add('hidden');
+                console.log(`✅ Аудио файл загружен: ${audioFile}`);
+            });
+            
+            audio.addEventListener('error', () => {
+                // Файл не найден или ошибка загрузки
+                loadedState.classList.add('hidden');
+                notFoundState.classList.remove('hidden');
+                console.log(`❌ Аудио файл не найден: ${audioFile}`);
+            });
+            
+            // Попытка загрузки
+            audio.load();
+        }
+
+        // Воспроизведение аудио
+        window.playAudio = function() {
+            const player = document.getElementById('audioPlayer');
+            const playBtn = document.getElementById('playBtn');
+            
+            if (player.paused) {
+                player.play();
+                playBtn.textContent = '⏸️ Пауза';
+            } else {
+                player.pause();
+                playBtn.textContent = '▶️ Играть';
+            }
+        };
+
+        // Демонстрация "воспроизведения наоборот"
+        window.playReversed = function() {
             const player = document.getElementById('audioPlayer');
             
-            if (url) {
-                player.src = url;
-                player.classList.remove('hidden');
-                player.load();
+            // Простая демонстрация - замедленное воспроизведение
+            if (player.playbackRate === 1) {
+                player.playbackRate = 0.5;
+                player.play();
+                alert('Демо: воспроизведение замедлено в 2 раза\n\nДля реального reverse нужен Web Audio API');
+            } else {
+                player.playbackRate = 1;
             }
         };
 
