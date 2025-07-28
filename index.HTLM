@@ -1,0 +1,805 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Мини-Квиз</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .puzzle-piece {
+            background-size: 300% 300%;
+            transition: all 0.3s ease;
+        }
+        .puzzle-piece-0 { background-position: 0% 0%; }
+        .puzzle-piece-1 { background-position: 50% 0%; }
+        .puzzle-piece-2 { background-position: 100% 0%; }
+        .puzzle-piece-3 { background-position: 0% 50%; }
+        .puzzle-piece-4 { background-position: 50% 50%; }
+        .puzzle-piece-5 { background-position: 100% 50%; }
+        .puzzle-piece-6 { background-position: 0% 100%; }
+        .puzzle-piece-7 { background-position: 50% 100%; }
+        .puzzle-piece-8 { background-position: 100% 100%; }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-purple-600 to-blue-600 text-white min-h-screen">
+    
+    <!-- Главное меню -->
+    <div id="mainMenu" class="flex flex-col items-center justify-center min-h-screen p-8">
+        <h1 class="text-6xl font-bold mb-8">🎯 Мини-Квиз</h1>
+        
+        <div class="bg-white/20 backdrop-blur-lg rounded-lg p-6 mb-8 max-w-md">
+            <h2 class="text-2xl font-semibold mb-4 text-center">Счет команд:</h2>
+            <div class="flex justify-between">
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-yellow-300">Команда 1</div>
+                    <div class="text-4xl font-bold" id="team1Score">0</div>
+                </div>
+                <div class="text-center">
+                    <div class="text-2xl font-bold text-green-300">Команда 2</div>
+                    <div class="text-4xl font-bold" id="team2Score">0</div>
+                </div>
+            </div>
+            <div id="winner" class="mt-4 text-center text-2xl hidden"></div>
+        </div>
+
+        <div class="text-center mb-8">
+            <div class="mb-6 p-4 bg-white/10 rounded-lg">
+                <h3 class="text-lg font-semibold mb-2">📁 Ваши файлы готовы!</h3>
+                <p class="text-sm mb-2">Найдено изображений фильмов: <span class="font-bold text-green-300">6</span></p>
+                <div class="text-xs text-green-200">✅ Используются ваши изображения</div>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
+                <div class="bg-white/10 rounded-lg p-4">
+                    <div class="text-3xl mb-2">🧩</div>
+                    <div class="font-semibold">Пазлы из фильмов</div>
+                    <div class="text-sm">Открывайте части изображения</div>
+                </div>
+                <div class="bg-white/10 rounded-lg p-4">
+                    <div class="text-3xl mb-2">🎵</div>
+                    <div class="font-semibold">Песни наоборот</div>
+                    <div class="text-sm">Угадайте трек</div>
+                </div>
+                <div class="bg-white/10 rounded-lg p-4">
+                    <div class="text-3xl mb-2">🧠</div>
+                    <div class="font-semibold">Общие знания</div>
+                    <div class="text-sm">Викторина</div>
+                </div>
+            </div>
+        </div>
+
+        <button onclick="startGame()" class="px-12 py-4 bg-green-500 hover:bg-green-600 rounded-lg font-bold text-2xl transition-colors">
+            Начать игру
+        </button>
+    </div>
+
+    <!-- Игровой экран -->
+    <div id="gameScreen" class="hidden min-h-screen">
+        <!-- Заголовок с счетом -->
+        <div class="bg-black/30 p-4">
+            <div class="flex justify-between items-center max-w-4xl mx-auto">
+                <div class="flex gap-8">
+                    <div id="team1Display" class="text-center p-3 rounded-lg bg-white/20">
+                        <div class="font-bold">Команда 1</div>
+                        <div class="text-2xl font-bold" id="gameTeam1Score">0</div>
+                    </div>
+                    <div id="team2Display" class="text-center p-3 rounded-lg bg-white/20">
+                        <div class="font-bold">Команда 2</div>
+                        <div class="text-2xl font-bold" id="gameTeam2Score">0</div>
+                    </div>
+                </div>
+                <div class="text-right">
+                    <div class="text-sm opacity-75">Вопрос <span id="questionNumber">1</span> из <span id="totalQuestions">9</span></div>
+                    <div class="font-bold">Ход команды <span id="currentTeamDisplay">1</span></div>
+                </div>
+            </div>
+        </div>
+
+        <div class="p-6 max-w-4xl mx-auto">
+            <div class="bg-white/10 backdrop-blur-lg rounded-lg p-6">
+                <!-- Заголовок вопроса -->
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="text-4xl" id="questionIcon">🧩</div>
+                    <h2 class="text-3xl font-bold" id="questionTitle">Угадай фильм по кадру</h2>
+                    <div class="ml-auto bg-yellow-500 px-4 py-2 rounded-full font-bold text-lg">
+                        <span id="questionPoints">100</span> очков
+                    </div>
+                </div>
+
+                <!-- Пазл -->
+                <div id="puzzleSection" class="mb-8">
+                    <div class="grid grid-cols-3 gap-2 max-w-lg mx-auto mb-4">
+                        <div class="aspect-square bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors flex items-center justify-center" onclick="revealPiece(0)">
+                            <span class="text-white font-bold text-xl">1</span>
+                        </div>
+                        <div class="aspect-square bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors flex items-center justify-center" onclick="revealPiece(1)">
+                            <span class="text-white font-bold text-xl">2</span>
+                        </div>
+                        <div class="aspect-square bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors flex items-center justify-center" onclick="revealPiece(2)">
+                            <span class="text-white font-bold text-xl">3</span>
+                        </div>
+                        <div class="aspect-square bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors flex items-center justify-center" onclick="revealPiece(3)">
+                            <span class="text-white font-bold text-xl">4</span>
+                        </div>
+                        <div class="aspect-square bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors flex items-center justify-center" onclick="revealPiece(4)">
+                            <span class="text-white font-bold text-xl">5</span>
+                        </div>
+                        <div class="aspect-square bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors flex items-center justify-center" onclick="revealPiece(5)">
+                            <span class="text-white font-bold text-xl">6</span>
+                        </div>
+                        <div class="aspect-square bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors flex items-center justify-center" onclick="revealPiece(6)">
+                            <span class="text-white font-bold text-xl">7</span>
+                        </div>
+                        <div class="aspect-square bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors flex items-center justify-center" onclick="revealPiece(7)">
+                            <span class="text-white font-bold text-xl">8</span>
+                        </div>
+                        <div class="aspect-square bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors flex items-center justify-center" onclick="revealPiece(8)">
+                            <span class="text-white font-bold text-xl">9</span>
+                        </div>
+                    </div>
+                    <p class="text-center text-sm opacity-75">
+                        Открыто фрагментов: <span id="revealedCount">0</span>/9
+                        <br>Очки уменьшаются с каждым открытым фрагментом!
+                    </p>
+                </div>
+
+                <!-- Музыкальная секция -->
+                <div id="musicSection" class="mb-8 text-center hidden">
+                    <div class="bg-black/50 rounded-lg p-6 mb-4">
+                        <div class="text-5xl mb-4">🎵</div>
+                        <p class="text-xl">Песня: <strong id="songName">Bohemian Rhapsody</strong></p>
+                        <p class="text-sm opacity-75 mt-2">(Демо режим - аудио файлы не загружены)</p>
+                        <div class="mt-4">
+                            <div class="bg-gray-800 p-4 rounded-lg">
+                                <p class="text-sm mb-3">🎵 Вставьте ссылку на аудио:</p>
+                                <input 
+                                    type="url" 
+                                    id="audioUrl" 
+                                    class="w-full p-2 rounded text-black mb-3"
+                                    placeholder="https://example.com/song.mp3"
+                                >
+                                <button onclick="loadAudio()" class="bg-blue-500 px-4 py-2 rounded hover:bg-blue-600">
+                                    Загрузить аудио
+                                </button>
+                                <audio id="audioPlayer" controls class="w-full mt-3 hidden">
+                                    Ваш браузер не поддерживает аудио
+                                </audio>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Секция эмодзи песен -->
+                <div id="emojiSection" class="mb-8 text-center hidden">
+                    <div class="bg-black/50 rounded-lg p-6 mb-4">
+                        <div class="text-6xl mb-4" id="emojiDisplay">👑🎭🎸</div>
+                        <p class="text-lg" id="emojiDescription">Классическая рок-опера группы Queen</p>
+                        <p class="text-sm text-yellow-300 mt-2">💡 Подсказка: Угадайте песню по эмодзи!</p>
+                    </div>
+                </div>
+
+                <!-- Обычный вопрос -->
+                <div id="triviaSection" class="mb-8 hidden">
+                    <p class="text-2xl text-center bg-black/30 p-6 rounded-lg" id="triviaQuestion">В каком году был основан YouTube?</p>
+                </div>
+
+                <!-- Варианты ответов (только для викторины) -->
+                <div id="answerSection" class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                    <button class="answer-btn p-4 rounded-lg font-semibold text-lg transition-colors bg-white/20 hover:bg-white/30" onclick="selectAnswer(0)">
+                        A. <span class="answer-text">5 элемент</span>
+                    </button>
+                    <button class="answer-btn p-4 rounded-lg font-semibold text-lg transition-colors bg-white/20 hover:bg-white/30" onclick="selectAnswer(1)">
+                        B. <span class="answer-text">Матрица</span>
+                    </button>
+                    <button class="answer-btn p-4 rounded-lg font-semibold text-lg transition-colors bg-white/20 hover:bg-white/30" onclick="selectAnswer(2)">
+                        C. <span class="answer-text">Аватар</span>
+                    </button>
+                    <button class="answer-btn p-4 rounded-lg font-semibold text-lg transition-colors bg-white/20 hover:bg-white/30" onclick="selectAnswer(3)">
+                        D. <span class="answer-text">Интерстеллар</span>
+                    </button>
+                </div>
+
+                <!-- Ввод текста (для пазлов и песен) -->
+                <div id="textInputSection" class="mb-8 hidden">
+                    <div class="max-w-md mx-auto">
+                        <label class="block text-lg font-semibold mb-3 text-center">Введите ваш ответ:</label>
+                        <input 
+                            type="text" 
+                            id="textAnswer" 
+                            class="w-full p-4 rounded-lg text-black text-lg font-semibold text-center"
+                            placeholder="Введите название..."
+                            onkeypress="if(event.key==='Enter') checkTextAnswer()"
+                        >
+                        <p class="text-sm text-yellow-300 mt-2 text-center">💡 Нажмите Enter или кнопку ниже</p>
+                    </div>
+                </div>
+
+                <!-- Кнопка ответа -->
+                <div id="submitSection" class="text-center hidden">
+                    <button onclick="submitAnswer()" class="px-12 py-4 bg-green-500 hover:bg-green-600 rounded-lg font-bold text-2xl transition-colors">
+                        Ответить
+                    </button>
+                </div>
+
+                <!-- Результат -->
+                <div id="resultSection" class="text-center hidden">
+                    <div id="resultMessage" class="text-4xl font-bold mb-4"></div>
+                    <p class="text-2xl mb-4">Правильный ответ: <strong id="correctAnswer">пятый элемент</strong></p>
+                    <p id="pointsMessage" class="text-xl mb-4"></p>
+                    <p class="text-sm opacity-75">Переход к следующему вопросу...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module">
+        // Данные квиза с вашими изображениями
+        const filmQuestions = [
+            {
+                type: 'puzzle',
+                title: 'Угадай фильм по кадру',
+                image: 'images/film_5_element.jpg',
+                correctAnswer: 'пятый элемент',
+                points: 100,
+                options: ['5 элемент', 'Матрица', 'Аватар', 'Интерстеллар']
+            },
+            {
+                type: 'puzzle', 
+                title: 'Угадай фильм по кадру',
+                image: 'images/film_nynki.jpg',
+                correctAnswer: 'няньки',
+                points: 120,
+                options: ['nynki', 'Терминатор', 'Начало', 'Бегущий по лезвию']
+            },
+            {
+                type: 'puzzle',
+                title: 'Угадай фильм по кадру', 
+                image: 'images/film_brilliant_hand.jpg',
+                correctAnswer: 'бриллиантовая рука',
+                points: 140,
+                options: ['brilliant hand', 'Крестный отец', 'Шерлок Холмс', 'Джеймс Бонд']
+            },
+            {
+                type: 'puzzle',
+                title: 'Угадай фильм по кадру',
+                image: 'images/film_titanic.jpg', 
+                correctAnswer: 'титаник',
+                points: 160,
+                options: ['titanic', 'Ромео и Джульетта', 'Касабланка', 'Грязные танцы']
+            },
+            {
+                type: 'puzzle',
+                title: 'Угадай фильм по кадру',
+                image: 'images/film_love&birds.jpg',
+                correctAnswer: 'любовь и голуби', 
+                points: 180,
+                options: ['love&birds', 'Любовь и голуби', 'Москва слезам не верит', 'Офицеры']
+            },
+            {
+                type: 'puzzle',
+                title: 'Угадай фильм по кадру',
+                image: 'images/film_mask.jpg',
+                correctAnswer: 'маска',
+                points: 200,
+                options: ['mask', 'Бэтмен', 'Человек-паук', 'Железный человек']
+            },
+            {
+                type: 'reverse-song',
+                title: 'Угадай песню (играет наоборот)',
+                description: 'Песня Queen про оперу и рок, название рифмуется со словом "псевдо"',
+                correctAnswer: 'Bohemian Rhapsody',
+                points: 150,
+                options: ['Bohemian Rhapsody', 'We Will Rock You', 'Another One Bites the Dust', 'Don\'t Stop Me Now']
+            },
+            {
+                type: 'emoji-song',
+                title: 'Угадай песню по эмодзи',
+                emojis: '👑🎭🎸',
+                description: 'Классическая рок-опера группы Queen',
+                correctAnswer: 'Bohemian Rhapsody',
+                points: 120,
+                options: ['Bohemian Rhapsody', 'We Will Rock You', 'Radio Ga Ga', 'Somebody to Love']
+            },
+            {
+                type: 'music-visual',
+                title: 'Угадай песню по эмодзи',
+                description: '👑🎭🎸 + классическая рок-опера',
+                correctAnswer: 'Bohemian Rhapsody',
+                points: 120,
+                options: ['Bohemian Rhapsody', 'We Will Rock You', 'Radio Ga Ga', 'Somebody to Love']
+            },
+            // География
+            {
+                type: 'trivia',
+                title: 'География',
+                question: 'Какая самая длинная река в мире?',
+                correctAnswer: 'Нил',
+                points: 60,
+                options: ['Амазонка', 'Нил', 'Миссисипи', 'Янцзы']
+            },
+            {
+                type: 'trivia',
+                title: 'География',
+                question: 'Столица Австралии?',
+                correctAnswer: 'Канберра',
+                points: 80,
+                options: ['Сидней', 'Мельбурн', 'Канберра', 'Перт']
+            },
+            // История
+            {
+                type: 'trivia',
+                title: 'История',
+                question: 'В каком году началась Первая мировая война?',
+                correctAnswer: '1914',
+                points: 70,
+                options: ['1912', '1914', '1916', '1918']
+            },
+            {
+                type: 'trivia',
+                title: 'История',
+                question: 'Кто был первым человеком на Луне?',
+                correctAnswer: 'Нил Армстронг',
+                points: 50,
+                options: ['Юрий Гагарин', 'Нил Армстронг', 'Базз Олдрин', 'Джон Гленн']
+            },
+            // Наука
+            {
+                type: 'trivia',
+                title: 'Наука',
+                question: 'Химический символ золота?',
+                correctAnswer: 'Au',
+                points: 60,
+                options: ['Go', 'Au', 'Ag', 'Al']
+            },
+            {
+                type: 'trivia',
+                title: 'Наука',
+                question: 'Сколько костей в теле взрослого человека?',
+                correctAnswer: '206',
+                points: 90,
+                options: ['196', '206', '216', '226']
+            },
+            // Спорт
+            {
+                type: 'trivia',
+                title: 'Спорт',
+                question: 'В каком виде спорта используется шайба?',
+                correctAnswer: 'Хоккей',
+                points: 40,
+                options: ['Футбол', 'Баскетбол', 'Хоккей', 'Теннис']
+            },
+            {
+                type: 'trivia',
+                title: 'Спорт',
+                question: 'Сколько игроков в футбольной команде на поле?',
+                correctAnswer: '11',
+                points: 30,
+                options: ['9', '10', '11', '12']
+            },
+            // Литература
+            {
+                type: 'trivia',
+                title: 'Литература',
+                question: 'Кто написал "Войну и мир"?',
+                correctAnswer: 'Лев Толстой',
+                points: 50,
+                options: ['Достоевский', 'Лев Толстой', 'Пушкин', 'Чехов']
+            },
+            {
+                type: 'trivia',
+                title: 'Литература',
+                question: 'В каком году было написано "1984" Оруэлла?',
+                correctAnswer: '1948',
+                points: 80,
+                options: ['1944', '1948', '1950', '1954']
+            },
+            // Искусство
+            {
+                type: 'trivia',
+                title: 'Искусство',
+                question: 'Кто нарисовал "Мону Лизу"?',
+                correctAnswer: 'Леонардо да Винчи',
+                points: 40,
+                options: ['Пикассо', 'Ван Гог', 'Леонардо да Винчи', 'Микеланджело']
+            },
+            {
+                type: 'trivia',
+                title: 'Искусство',
+                question: 'В каком городе находится Эрмитаж?',
+                correctAnswer: 'Санкт-Петербург',
+                points: 50,
+                options: ['Москва', 'Санкт-Петербург', 'Киев', 'Минск']
+            },
+            // Природа
+            {
+                type: 'trivia',
+                title: 'Природа',
+                question: 'Какое самое большое млекопитающее?',
+                correctAnswer: 'Синий кит',
+                points: 60,
+                options: ['Слон', 'Синий кит', 'Жираф', 'Белый медведь']
+            },
+            {
+                type: 'trivia',
+                title: 'Природа',
+                question: 'Сколько сердец у осьминога?',
+                correctAnswer: '3',
+                points: 90,
+                options: ['1', '2', '3', '4']
+            },
+            // Технологии
+            {
+                type: 'trivia',
+                title: 'Технологии',
+                question: 'В каком году был основан YouTube?',
+                correctAnswer: '2005',
+                points: 50,
+                options: ['2004', '2005', '2006', '2007']
+            },
+            {
+                type: 'trivia',
+                title: 'Технологии',
+                question: 'Кто основал компанию Apple?',
+                correctAnswer: 'Стив Джобс',
+                points: 40,
+                options: ['Билл Гейтс', 'Стив Джобс', 'Марк Цукерберг', 'Илон Маск']
+            },
+            // Музыка
+            {
+                type: 'trivia',
+                title: 'Музыка',
+                question: 'Сколько струн у стандартной гитары?',
+                correctAnswer: '6',
+                points: 30,
+                options: ['4', '5', '6', '7']
+            },
+            {
+                type: 'trivia',
+                title: 'Музыка',
+                question: 'Из какой страны группа ABBA?',
+                correctAnswer: 'Швеция',
+                points: 60,
+                options: ['Норвегия', 'Швеция', 'Дания', 'Финляндия']
+            },
+            // Еда
+            {
+                type: 'trivia',
+                title: 'Кулинария',
+                question: 'Из какой страны суши?',
+                correctAnswer: 'Япония',
+                points: 20,
+                options: ['Китай', 'Япония', 'Корея', 'Таиланд']
+            },
+            {
+                type: 'trivia',
+                title: 'Кулинария',
+                question: 'Какой витамин вырабатывается под действием солнца?',
+                correctAnswer: 'Витамин D',
+                points: 70,
+                options: ['Витамин A', 'Витамин B', 'Витамин C', 'Витамин D']
+            },
+            {
+                type: 'reverse-song',
+                title: 'Угадай песню (играет наоборот)',
+                description: 'Майкл Джексон поет НЕ о том, что он отец мальчика',
+                correctAnswer: 'Billie Jean',
+                points: 180,
+                options: ['Billie Jean', 'Beat It', 'Thriller', 'Smooth Criminal']
+            },
+            {
+                type: 'emoji-song',
+                title: 'Угадай песню по эмодзи',
+                emojis: '💃🕺👖',
+                description: 'Майкл Джексон и история о девушке',
+                correctAnswer: 'Billie Jean',
+                points: 160,
+                options: ['Billie Jean', 'Beat It', 'Thriller', 'Smooth Criminal']
+            },
+            {
+                type: 'emoji-song',
+                title: 'Угадай русскую песню по эмодзи',
+                emojis: '🌙🌟💫',
+                description: 'Романс о ночном светиле',
+                correctAnswer: 'Лунная серенада',
+                points: 140,
+                options: ['Лунная серенада', 'Подмосковные вечера', 'Темная ночь', 'Катюша']
+            },
+            {
+                type: 'emoji-song',
+                title: 'Угадай песню по эмодзи',
+                emojis: '🧟‍♂️💃🌙',
+                description: 'Хит Майкла Джексона о ночных монстрах',
+                correctAnswer: 'Thriller',
+                points: 130,
+                options: ['Thriller', 'Smooth Criminal', 'Beat It', 'Bad']
+            },
+            {
+                type: 'emoji-song',
+                title: 'Угадай песню по эмодзи',
+                emojis: '💛🚤🌊',
+                description: 'The Beatles и подводное путешествие',
+                correctAnswer: 'Yellow Submarine',
+                points: 110,
+                options: ['Yellow Submarine', 'Here Comes the Sun', 'Lucy in the Sky', 'All You Need Is Love']
+            },
+            {
+                type: 'emoji-song',
+                title: 'Угадай песню по эмодзи',
+                emojis: '🏠💔😢',
+                description: 'Грустная баллада о доме и разлуке',
+                correctAnswer: 'Hotel California',
+                points: 150,
+                options: ['Hotel California', 'Stairway to Heaven', 'Comfortably Numb', 'Wish You Were Here']
+            },
+            {
+                type: 'emoji-song',
+                title: 'Угадай русскую песню по эмодзи',
+                emojis: '🌃🏙️💡',
+                description: 'Песня о вечерах в пригороде столицы',
+                correctAnswer: 'Подмосковные вечера',
+                points: 100,
+                options: ['Подмосковные вечера', 'Московские окна', 'Вечерняя песня', 'Огни Москвы']
+            }
+        ];
+
+        // Игровые переменные
+        let currentQuestion = 0;
+        let currentTeam = 1;
+        let team1Score = 0;
+        let team2Score = 0;
+        let puzzleRevealed = Array(9).fill(false);
+        let selectedAnswerIndex = -1;
+
+        // Функция начала игры
+        window.startGame = function() {
+            document.getElementById('mainMenu').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+            loadQuestion();
+        };
+
+        // Загрузка вопроса
+        function loadQuestion() {
+            const question = filmQuestions[currentQuestion];
+            
+            // Обновляем заголовки
+            document.getElementById('questionNumber').textContent = currentQuestion + 1;
+            document.getElementById('totalQuestions').textContent = filmQuestions.length;
+            document.getElementById('currentTeamDisplay').textContent = currentTeam;
+            document.getElementById('questionTitle').textContent = question.title;
+            document.getElementById('questionPoints').textContent = question.points;
+
+            // Обновляем иконку в зависимости от темы
+            let icon = '🧠'; // По умолчанию для викторины
+            if (question.type === 'puzzle') icon = '🧩';
+            else if (question.type === 'reverse-song') icon = '🎵';
+            else if (question.type === 'emoji-song') icon = '😀';
+            else if (question.title === 'География') icon = '🌍';
+            else if (question.title === 'История') icon = '📚';
+            else if (question.title === 'Наука') icon = '🔬';
+            else if (question.title === 'Спорт') icon = '⚽';
+            else if (question.title === 'Литература') icon = '📖';
+            else if (question.title === 'Искусство') icon = '🎨';
+            else if (question.title === 'Природа') icon = '🌿';
+            else if (question.title === 'Технологии') icon = '💻';
+            else if (question.title === 'Музыка') icon = '🎵';
+            else if (question.title === 'Кулинария') icon = '🍳';
+            
+            document.getElementById('questionIcon').textContent = icon;
+
+            // Показываем нужную секцию
+            document.getElementById('puzzleSection').classList.toggle('hidden', question.type !== 'puzzle');
+            document.getElementById('musicSection').classList.toggle('hidden', question.type !== 'reverse-song');
+            document.getElementById('emojiSection').classList.toggle('hidden', question.type !== 'emoji-song');
+            document.getElementById('triviaSection').classList.toggle('hidden', question.type !== 'trivia');
+
+            // Обновляем подсветку команд
+            document.getElementById('team1Display').className = currentTeam === 1 ? 'text-center p-3 rounded-lg bg-yellow-500' : 'text-center p-3 rounded-lg bg-white/20';
+            document.getElementById('team2Display').className = currentTeam === 2 ? 'text-center p-3 rounded-lg bg-green-500' : 'text-center p-3 rounded-lg bg-white/20';
+
+            // Подготавливаем пазл (НЕ загружаем изображения сразу)
+            if (question.type === 'puzzle') {
+                const puzzleGrid = document.querySelector('#puzzleSection .grid');
+                
+                for (let i = 0; i < 9; i++) {
+                    const piece = puzzleGrid.children[i];
+                    // Сбрасываем к начальному состоянию - только серый блок с номером
+                    piece.className = 'aspect-square bg-gray-800 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors flex items-center justify-center';
+                    piece.style.backgroundImage = ''; // Убираем фоновое изображение
+                    piece.innerHTML = `<span class="text-white font-bold text-xl">${i + 1}</span>`;
+                }
+                puzzleRevealed = Array(9).fill(false);
+                document.getElementById('revealedCount').textContent = '0';
+            }
+
+            // Обновляем музыкальную секцию
+            if (question.type === 'reverse-song') {
+                document.getElementById('songName').textContent = question.correctAnswer;
+            }
+
+            // Обновляем секцию эмодзи
+            if (question.type === 'emoji-song') {
+                document.getElementById('emojiDisplay').textContent = question.emojis;
+                document.getElementById('emojiDescription').textContent = question.description;
+            }
+
+            // Обновляем вопрос викторины
+            if (question.type === 'trivia') {
+                document.getElementById('triviaQuestion').textContent = question.question;
+            }
+
+            // Обновляем варианты ответов
+            const answerButtons = document.querySelectorAll('.answer-btn');
+            question.options.forEach((option, index) => {
+                if (answerButtons[index]) {
+                    answerButtons[index].querySelector('.answer-text').textContent = option;
+                    answerButtons[index].className = 'answer-btn p-4 rounded-lg font-semibold text-lg transition-colors bg-white/20 hover:bg-white/30';
+                }
+            });
+
+            // Сброс состояния
+            selectedAnswerIndex = -1;
+            
+            // Прячем варианты ответов для пазлов и музыкальных вопросов
+            if (question.type === 'puzzle' || question.type === 'reverse-song' || question.type === 'emoji-song') {
+                document.getElementById('answerSection').classList.add('hidden');
+                document.getElementById('textInputSection').classList.remove('hidden');
+                document.getElementById('textAnswer').value = '';
+            } else {
+                document.getElementById('answerSection').classList.remove('hidden');
+                document.getElementById('textInputSection').classList.add('hidden');
+            }
+            
+            document.getElementById('submitSection').classList.add('hidden');
+            document.getElementById('resultSection').classList.add('hidden');
+        }
+
+        // Открытие фрагмента пазла
+        window.revealPiece = function(index) {
+            if (puzzleRevealed[index]) return;
+            
+            puzzleRevealed[index] = true;
+            const piece = document.querySelector('#puzzleSection .grid').children[index];
+            const question = filmQuestions[currentQuestion];
+            
+            // Убираем номер и серый фон
+            piece.innerHTML = '';
+            piece.classList.remove('bg-gray-800', 'hover:bg-gray-700');
+            
+            // ТЕПЕРЬ добавляем изображение только для этого кусочка
+            piece.style.backgroundImage = `url(${question.image})`;
+            piece.className = `aspect-square rounded-lg cursor-pointer transition-colors puzzle-piece puzzle-piece-${index}`;
+            
+            const revealedCount = puzzleRevealed.filter(Boolean).length;
+            document.getElementById('revealedCount').textContent = revealedCount;
+        };
+
+        // Выбор ответа (только для викторины)
+        window.selectAnswer = function(index) {
+            selectedAnswerIndex = index;
+            
+            const answerButtons = document.querySelectorAll('.answer-btn');
+            answerButtons.forEach((btn, i) => {
+                btn.className = i === index 
+                    ? 'answer-btn p-4 rounded-lg font-semibold text-lg transition-colors bg-blue-500 hover:bg-blue-600'
+                    : 'answer-btn p-4 rounded-lg font-semibold text-lg transition-colors bg-white/20 hover:bg-white/30';
+            });
+
+            document.getElementById('submitSection').classList.remove('hidden');
+        };
+
+        // Проверка текстового ответа
+        window.checkTextAnswer = function() {
+            const userAnswer = document.getElementById('textAnswer').value.trim();
+            if (userAnswer) {
+                selectedAnswerIndex = userAnswer;
+                document.getElementById('submitSection').classList.remove('hidden');
+            }
+        };
+
+        // Отправка ответа
+        window.submitAnswer = function() {
+            const question = filmQuestions[currentQuestion];
+            let selectedAnswer;
+            let isCorrect;
+            
+            if (question.type === 'puzzle' || question.type === 'reverse-song' || question.type === 'emoji-song') {
+                // Для пазлов и песен используем текстовый ввод
+                selectedAnswer = selectedAnswerIndex;
+                // Проверяем ответ (регистронезависимо и убираем лишние пробелы)
+                isCorrect = selectedAnswer.toLowerCase().trim() === question.correctAnswer.toLowerCase().trim();
+            } else {
+                // Для викторины используем варианты ответов
+                selectedAnswer = question.options[selectedAnswerIndex];
+                isCorrect = selectedAnswer === question.correctAnswer;
+            }
+            
+            let pointsToAdd = question.points;
+            if (question.type === 'puzzle') {
+                const revealedCount = puzzleRevealed.filter(Boolean).length;
+                pointsToAdd = Math.max(50, question.points - (revealedCount * 15));
+            }
+
+            if (isCorrect) {
+                if (currentTeam === 1) {
+                    team1Score += pointsToAdd;
+                } else {
+                    team2Score += pointsToAdd;
+                }
+                updateScores();
+            }
+
+            // Показать результат
+            document.getElementById('answerSection').classList.add('hidden');
+            document.getElementById('textInputSection').classList.add('hidden');
+            document.getElementById('submitSection').classList.add('hidden');
+            document.getElementById('resultSection').classList.remove('hidden');
+            
+            document.getElementById('resultMessage').textContent = isCorrect ? '✅ Правильно!' : '❌ Неправильно!';
+            document.getElementById('resultMessage').className = isCorrect ? 'text-4xl font-bold mb-4 text-green-300' : 'text-4xl font-bold mb-4 text-red-300';
+            document.getElementById('correctAnswer').textContent = question.correctAnswer;
+            
+            if (isCorrect) {
+                document.getElementById('pointsMessage').textContent = `Команда ${currentTeam} получает ${pointsToAdd} очков!`;
+                document.getElementById('pointsMessage').className = 'text-xl text-green-300 mb-4';
+            } else {
+                document.getElementById('pointsMessage').textContent = '';
+            }
+
+            setTimeout(() => {
+                nextQuestion();
+            }, 3000);
+        };
+
+        // Следующий вопрос
+        function nextQuestion() {
+            currentQuestion++;
+            if (currentQuestion >= filmQuestions.length) {
+                endGame();
+                return;
+            }
+            
+            currentTeam = currentTeam === 1 ? 2 : 1;
+            loadQuestion();
+        }
+
+        // Обновление счета
+        function updateScores() {
+            document.getElementById('gameTeam1Score').textContent = team1Score;
+            document.getElementById('gameTeam2Score').textContent = team2Score;
+        }
+
+        // Загрузка аудио
+        window.loadAudio = function() {
+            const url = document.getElementById('audioUrl').value;
+            const player = document.getElementById('audioPlayer');
+            
+            if (url) {
+                player.src = url;
+                player.classList.remove('hidden');
+                player.load();
+            }
+        };
+
+        // Окончание игры
+        function endGame() {
+            document.getElementById('team1Score').textContent = team1Score;
+            document.getElementById('team2Score').textContent = team2Score;
+            
+            const winner = document.getElementById('winner');
+            winner.classList.remove('hidden');
+            winner.textContent = team1Score > team2Score 
+                ? '🏆 Победитель: Команда 1!' 
+                : team2Score > team1Score 
+                    ? '🏆 Победитель: Команда 2!'
+                    : '🤝 Ничья!';
+
+            document.getElementById('gameScreen').classList.add('hidden');
+            document.getElementById('mainMenu').classList.remove('hidden');
+            
+            // Сброс игры
+            currentQuestion = 0;
+            currentTeam = 1;
+        }
+    </script>
+</body>
+</html>
