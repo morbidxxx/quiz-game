@@ -48,7 +48,7 @@
                 <p class="text-sm mb-2">Изображения фильмов: <span class="font-bold text-green-300">6 шт ✅</span></p>
                 <p class="text-sm mb-2">Аудио файлы: <span class="font-bold text-blue-300">Загрузите в папку audio/</span></p>
                 <div class="text-xs text-yellow-200">
-                    💡 Поместите файлы: bohemian_rhapsody_reverse.mp3, billie_jean_reverse.mp3
+                    
                 </div>
             </div>
             
@@ -150,7 +150,7 @@
                 <div id="musicSection" class="mb-8 text-center hidden">
                     <div class="bg-black/50 rounded-lg p-6 mb-4">
                         <div class="text-5xl mb-4">🎵</div>
-                        //<p class="text-xl">Песня: <strong id="songName">Bohemian Rhapsody</strong></p>
+                       
                         <p class="text-sm opacity-75 mt-2">(Демо режим - аудио файлы не загружены)</p>
                         <div class="mt-4" id="audioContainer">
                             <div class="bg-gray-800 p-4 rounded-lg">
@@ -611,7 +611,7 @@
             selectedAnswerIndex = -1;
             
             // Прячем варианты ответов для пазлов и музыкальных вопросов
-            if (question.type === 'puzzle' || question.type === 'emoji-song') {
+            if (question.type === 'puzzle' || question.type === 'reverse-song' || question.type === 'emoji-song') {
                 document.getElementById('answerSection').classList.add('hidden');
                 document.getElementById('textInputSection').classList.remove('hidden');
                 document.getElementById('textAnswer').value = '';
