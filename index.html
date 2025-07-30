@@ -611,18 +611,18 @@
             selectedAnswerIndex = -1;
             
             // Прячем варианты ответов для пазлов и музыкальных вопросов
-            //if (question.type === 'puzzle' || question.type === 'reverse-song' || question.type === 'emoji-song') {
-                //document.getElementById('answerSection').classList.add('hidden');
-                //document.getElementById('textInputSection').classList.remove('hidden');
-                //document.getElementById('textAnswer').value = '';
-            //} else {
-                //document.getElementById('answerSection').classList.remove('hidden');
-                //document.getElementById('textInputSection').classList.add('hidden');
+            if (question.type === 'puzzle' || question.type === 'emoji-song') {
+                document.getElementById('answerSection').classList.add('hidden');
+                document.getElementById('textInputSection').classList.remove('hidden');
+                document.getElementById('textAnswer').value = '';
+            } else {
+                document.getElementById('answerSection').classList.remove('hidden');
+                document.getElementById('textInputSection').classList.add('hidden');
             }
             
-            //document.getElementById('submitSection').classList.add('hidden');
-            //document.getElementById('resultSection').classList.add('hidden');
-        //}
+            document.getElementById('submitSection').classList.add('hidden');
+            document.getElementById('resultSection').classList.add('hidden');
+        }
 
         // Открытие фрагмента пазла
         window.revealPiece = function(index) {
