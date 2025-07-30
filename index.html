@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Мини-Квиз</title>
+    <title>Мини-Квиз на днюху!</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         .puzzle-piece {
@@ -25,7 +25,7 @@
     
       <!-- Главное меню -->
     <div id="mainMenu" class="flex flex-col items-center justify-center min-h-screen p-8">
-        <h1 class="text-6xl font-bold mb-8">🎯 Мини-Квиз</h1>
+        <h1 class="text-6xl font-bold mb-8">🎯 Мини-Квиз на днюху!</h1>
         
         <div class="bg-white/20 backdrop-blur-lg rounded-lg p-6 mb-8 max-w-md">
             <h2 class="text-2xl font-semibold mb-4 text-center">Счет команд:</h2>
@@ -150,7 +150,7 @@
                 <div id="musicSection" class="mb-8 text-center hidden">
                     <div class="bg-black/50 rounded-lg p-6 mb-4">
                         <div class="text-5xl mb-4">🎵</div>
-                        <p class="text-xl">Песня: <strong id="songName">Bohemian Rhapsody</strong></p>
+                        //<p class="text-xl">Песня: <strong id="songName">Bohemian Rhapsody</strong></p>
                         <p class="text-sm opacity-75 mt-2">(Демо режим - аудио файлы не загружены)</p>
                         <div class="mt-4" id="audioContainer">
                             <div class="bg-gray-800 p-4 rounded-lg">
@@ -422,19 +422,11 @@
                 title: 'Наука',
                 question: 'Сколько костей в теле взрослого человека?',
                 correctAnswer: '206',
-                points: 90,
+                points: 80,
                 options: ['196', '206', '216', '226']
             },        
-                
+              
            
-            {
-                type: 'trivia',
-                title: 'Природа',
-                question: 'Сколько сердец у осьминога?',
-                correctAnswer: '3',
-                points: 90,
-                options: ['1', '2', '3', '4']
-            },
             // Технологии
             {
                 type: 'trivia',
@@ -619,18 +611,18 @@
             selectedAnswerIndex = -1;
             
             // Прячем варианты ответов для пазлов и музыкальных вопросов
-            if (question.type === 'puzzle' || question.type === 'reverse-song' || question.type === 'emoji-song') {
-                document.getElementById('answerSection').classList.add('hidden');
-                document.getElementById('textInputSection').classList.remove('hidden');
-                document.getElementById('textAnswer').value = '';
-            } else {
-                document.getElementById('answerSection').classList.remove('hidden');
-                document.getElementById('textInputSection').classList.add('hidden');
+            //if (question.type === 'puzzle' || question.type === 'reverse-song' || question.type === 'emoji-song') {
+                //document.getElementById('answerSection').classList.add('hidden');
+                //document.getElementById('textInputSection').classList.remove('hidden');
+                //document.getElementById('textAnswer').value = '';
+            //} else {
+                //document.getElementById('answerSection').classList.remove('hidden');
+                //document.getElementById('textInputSection').classList.add('hidden');
             }
             
-            document.getElementById('submitSection').classList.add('hidden');
-            document.getElementById('resultSection').classList.add('hidden');
-        }
+            //document.getElementById('submitSection').classList.add('hidden');
+            //document.getElementById('resultSection').classList.add('hidden');
+        //}
 
         // Открытие фрагмента пазла
         window.revealPiece = function(index) {
